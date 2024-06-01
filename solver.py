@@ -5,5 +5,5 @@ from abc import ABC, abstractmethod
 class Solver(ABC):
 
     @abstractmethod
-    def implementation(self, board: Board):
+    def solve(self):
         pass

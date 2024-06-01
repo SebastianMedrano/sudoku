@@ -1,5 +1,5 @@
 from board import Board
-from coloredGraph import ColoredGraphSolution
+from coloredGraph import ColoredGraphSolver
  
 if __name__=="__main__":
     initial_sudoku = [
@@ -29,13 +29,28 @@ if __name__=="__main__":
 
 
     
-    board = Board(3, initial_sudoku)
-    board2 = Board(3, initial_sudoku)
-    c = ColoredGraphSolution(board)
-    solution = c.implementation(board=board)
-    print("hola")
-    print(solution.board)
-    if (solution.board== solved_sudoku).all():
-        print("solucionado")
-    else:
-        print("error")
+    # board = Board(3, initial_sudoku)
+    # board2 = Board(3, initial_sudoku)
+    # c = ColoredGraphSolution(board)
+    # solution = c.implementation(board=board)
+    # print("hola")
+    # print(solution.board)
+    # if (solution.board== solved_sudoku).all():
+    #     print("solucionado")
+    # else:
+    #     print("error")
+
+
+    board = Board(initial_sudoku)
+
+    # Choose a solver (either ColoredGraphSolver or BacktrackingSolver)
+    solver = ColoredGraphSolver(board)  # or use ColoredGraphSolver(board)
+
+    # Solve the Sudoku
+    try:
+        solution = solver.solve()
+        print("Solved Sudoku:")
+        for row in solution:
+            print(row)
+    except ValueError as e:
+        print(str(e))

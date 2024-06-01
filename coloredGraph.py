@@ -3,80 +3,79 @@ from board import Board
 from graph import Graph
 from solver import Solver
 
-class ColoredGraphSolution(Graph, Solver):
-    
-    def __init__(self, board: Board):
-        connections = []
-        for i in range(0, board.n**2):
-            for j in range(0, board.n**2): 
-                for k in range(j+1, board.n**2):
-                    connections.append(("{}_{}".format(i,j),"{}_{}".format(i,k)))
-                    connections.append(("{}_{}".format(j,i),"{}_{}".format(k,i)))
-                    
-        for i in range(0, board.n**2, board.n):
-            for j in range(0, board.n**2,board.n):
-                sub_group=[]
-                for k in range(i, i+board.n):
-                    for l in range(j, j+board.n):
-                        sub_group.append("{}_{}".format(k,l))
-                for z in range(0,len(sub_group)):
-                    for m in range(z+1,len(sub_group)):
-                        connections.append((sub_group[z],sub_group[m]))
-                sub_group.clear()
-             
-        super().__init__(connections, False)
-    def implementation(self, board: Board):
-        solution = board
-        count=0
-        while((not board.check_solution(solution.board)) and count<10):
-            print(count)
-            print(str(solution.board))
-            for i in range(0, board.n**2):
-                for j in range(0, board.n**2):
-                    if solution.board[i][j]==0:
-                        solution.board[i][j]=self.get_value(i,j,solution)
-                    else:
-                        self.link_nodes_same_values((i,j), solution)
-             
-            count +=1
-        return solution
-    
-    def link_nodes_same_values(self, position: tuple, solution: Board):
-        equal_nodes= []
-        filled_nodes = []
-        connections = []
-        for i in range(0, solution.n**2):
-                for j in range(0, solution.n**2):
-                    if solution.board[i,j]==solution.board[position[0],position[1]]:
-                        equal_nodes.append("{}_{}".format(i,j))
-                    elif solution.board[i,j]!=solution.board[position[0],position[1]] and solution.board[i,j]!=0:
-                      filled_nodes.append("{}_{}".format(i,j))  
-        for z in range(0,len(equal_nodes)):
-            for m in range(z+1,len(equal_nodes)):
-                for neighbor in self._graph[equal_nodes[m]]:
-                    if not self.is_connected(node1=equal_nodes[z], node2=neighbor):
-                        connections.append((equal_nodes[z],neighbor))
-        for filled_node in filled_nodes:
-            if not self.is_connected(node1=filled_node, node2="{}_{}".format(position[0],position[1])):
-                        connections.append((filled_node,"{}_{}".format(position[0],position[1])))
-        self.add_connections(connections)
+class ColoredGraphSolver(Graph, Solver):
+    def __init__(self, board: Board) -> None:
+        self.board = board
+        self.size = board._size
+        self.subgrid_size = board._sub_grid_size
+        super().__init__([], False)
+        self.add_connections(self._create_initial_connections())
+        self._color_initial_nodes()
 
-    def get_value(self, row: int, column: int, solution: Board):
-        print(solution.board)
-        node = "{}_{}".format(row,column)
-        possible_values = set(range(1,solution.n**2+1))
-        connections = self._graph[node]
-        print(node)
-        print(connections)
-        for connection in connections:
-            position = self.get_row_and_column(connection)
-            connection_value = solution.board[position[0]][position[1]]
-            print(connection+"  discard  "+ str(connection_value))
-            possible_values.discard(connection_value)
-        print("possible values: "+str(possible_values))
-        if(len(possible_values)==1):
-            return list(possible_values)[0]
+    def _create_initial_connections(self) -> list:
+        connections = []
+        for row in range(self.size):
+            for col in range(self.size):
+                node = (row, col)
+                connections.extend(self._add_common_edges(node))
+                connections.extend(self._add_filled_edges(node))
+        return connections
+
+    def _add_common_edges(self, node1: tuple) -> list:
+        connections = []
+        row, col = node1
+        for i in range(self.size):
+            if i != col:
+                node2 = (row,i)
+                connections.append((node1,node2))
+            if i != row:
+                node2 = (i,col)
+                connections.append((node1,node2))
+        subgrid_row_start = (row // self.subgrid_size) * self.subgrid_size
+        subgrid_col_start = (col // self.subgrid_size) * self.subgrid_size
+        for i in range(subgrid_row_start, subgrid_row_start + self.subgrid_size):
+            for j in range(subgrid_col_start, subgrid_col_start + self.subgrid_size):
+                if (i, j) != node1:
+                    node2 = (i,j)
+                    connections.append((node1,node2))
+        return connections
+    
+    def _add_filled_edges(self,node: tuple)->list:
+        connections = []
+        equal_value_nodes= []
+        connections = []
+        for node_in_graph in self._graph:
+            if self.get_value(node_in_graph) == self.get_value(node) != 0:
+                equal_value_nodes.append(node)
+        for index, first_node in enumerate(equal_value_nodes):
+            for second_node in equal_value_nodes[index:]:
+                for neighbor in self.get_neighbors(second_node):
+                    if not self.is_connected(first_node, neighbor):
+                        connections.append((first_node,neighbor))
+        return connections
+    
+    def _color_node(self, node):
+        possible_values = set(range(1, self.size + 1))
+        for neighbor in self.get_neighbors(node):
+            if self.get_value(neighbor) in possible_values:
+                possible_values.remove(self.get_value(neighbor))
+        if len(possible_values) == 1 and self.board.set_value(*node,next(iter(possible_values))):
+            self.set_value(node, possible_values.pop())
+    
+    def solve(self,):
+        while(not self.board.is_complete()):
+            print(str(self.board))
+            for row in range(self.size):
+                for cell in range(self.size):
+                    if self.board.get_state()[row][cell]==0:
+                        self._color_node((row,cell))
+                    else:
+                        self.add_connections(self._add_filled_edges((row,cell)))
+        if self.board.is_valid():
+            return self.board.get_state()
         else:
-            return 0
-    def get_row_and_column(self, node):
-        return(int(node.split("_")[0]),int(node.split("_")[1]))
+             raise Exception("Error")
+    def _color_initial_nodes(self):
+       for row in range(self.size):
+            for cell in range(self.size):
+                self.set_value((row,cell), self.board.get_state()[row][cell])
