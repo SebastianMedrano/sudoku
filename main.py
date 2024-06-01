@@ -1,18 +1,30 @@
 from board import Board
-from coloredGraph import ColoredGraphSolver
+from solver.coloredGraphSolver import ColoredGraphSolver
  
 if __name__=="__main__":
     initial_sudoku = [
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9]
+    [0, 2, 3, 4,  5, 6, 7, 8,  9, 0, 11, 12,  13, 14, 15, 16],
+    [5, 6, 7, 8,  9, 10, 11, 12,  13, 14, 15, 0,  1, 2, 3, 4],
+    [9, 10, 0, 12,  0, 14, 15, 16,  1, 2, 0, 4,  5, 6, 7, 8],
+    [13, 14, 15, 16,  1, 2, 3, 4,  5, 6, 7, 8,  9, 10, 11, 12],
+
+    [2, 3, 0, 5,  6, 7, 8, 9,  10, 11, 12, 13,  14, 15, 16, 1],
+    [6, 7, 8, 9,  10, 11, 12, 13,  14, 15, 16, 1,  2, 3, 4, 5],
+    [10, 11, 0, 13,  0, 15, 16, 1,  2, 3, 4, 5,  0, 7, 0, 9],
+    [14, 15, 16, 1,  2, 3, 4, 5,  6, 7, 8, 9,  10, 11, 12, 13],
+
+    [3, 4, 5, 6,  7, 8, 9, 10,  0, 12, 13, 14,  15, 16, 1, 2],
+    [7, 8, 9, 10,  11, 12, 13, 14,  15, 0, 1, 2,  3, 4, 5, 6],
+    [11, 0, 13, 14,  15, 16, 1, 2,  3, 4, 5, 6,  7, 8, 0, 10],
+    [15, 16, 1, 2,  3, 4, 5, 6,  7, 8, 9, 10,  0, 12, 13, 14],
+
+    [4, 5, 6, 7,  8, 9, 10, 11,  12, 13, 14, 15,  16, 1, 2, 3],
+    [8, 9, 10, 11,  12, 13, 14, 15,  16, 1, 2, 3,  4, 5, 0, 7],
+    [12, 13, 14, 15,  16, 1, 2, 3,  4, 5, 6, 7,0,0,0,0],
+    [0, 1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,0,0,0,0]
     ]
+
+
 
     solved_sudoku = [
     [5, 3, 4, 6, 7, 8, 9, 1, 2],
@@ -28,25 +40,11 @@ if __name__=="__main__":
 
 
 
-    
-    # board = Board(3, initial_sudoku)
-    # board2 = Board(3, initial_sudoku)
-    # c = ColoredGraphSolution(board)
-    # solution = c.implementation(board=board)
-    # print("hola")
-    # print(solution.board)
-    # if (solution.board== solved_sudoku).all():
-    #     print("solucionado")
-    # else:
-    #     print("error")
-
 
     board = Board(initial_sudoku)
 
-    # Choose a solver (either ColoredGraphSolver or BacktrackingSolver)
-    solver = ColoredGraphSolver(board)  # or use ColoredGraphSolver(board)
-
-    # Solve the Sudoku
+    solver = ColoredGraphSolver(board)
+    
     try:
         solution = solver.solve()
         print("Solved Sudoku:")

@@ -1,9 +1,8 @@
 import numpy as np
 from board import Board
-from graph import Graph
-from solver import Solver
+from graph.graph import Graph
 
-class ColoredGraphSolver(Graph, Solver):
+class ColoredGraph(Graph):
     def __init__(self, board: Board) -> None:
         self.board = board
         self.size = board._size
@@ -18,7 +17,7 @@ class ColoredGraphSolver(Graph, Solver):
             for col in range(self.size):
                 node = (row, col)
                 connections.extend(self._add_common_edges(node))
-                connections.extend(self._add_filled_edges(node))
+                connections.extend(self.add_filled_edges(node))
         return connections
 
     def _add_common_edges(self, node1: tuple) -> list:
@@ -40,7 +39,7 @@ class ColoredGraphSolver(Graph, Solver):
                     connections.append((node1,node2))
         return connections
     
-    def _add_filled_edges(self,node: tuple)->list:
+    def add_filled_edges(self,node: tuple)->list:
         connections = []
         equal_value_nodes= []
         connections = []
@@ -54,7 +53,7 @@ class ColoredGraphSolver(Graph, Solver):
                         connections.append((first_node,neighbor))
         return connections
     
-    def _color_node(self, node):
+    def color_node(self, node):
         possible_values = set(range(1, self.size + 1))
         for neighbor in self.get_neighbors(node):
             if self.get_value(neighbor) in possible_values:
@@ -62,19 +61,6 @@ class ColoredGraphSolver(Graph, Solver):
         if len(possible_values) == 1 and self.board.set_value(*node,next(iter(possible_values))):
             self.set_value(node, possible_values.pop())
     
-    def solve(self,):
-        while(not self.board.is_complete()):
-            print(str(self.board))
-            for row in range(self.size):
-                for cell in range(self.size):
-                    if self.board.get_state()[row][cell]==0:
-                        self._color_node((row,cell))
-                    else:
-                        self.add_connections(self._add_filled_edges((row,cell)))
-        if self.board.is_valid():
-            return self.board.get_state()
-        else:
-             raise Exception("Error")
     def _color_initial_nodes(self):
        for row in range(self.size):
             for cell in range(self.size):
